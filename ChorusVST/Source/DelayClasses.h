@@ -1,0 +1,135 @@
+/*
+  ==============================================================================
+
+    DelayClass.h
+    Created: 9 Nov 2021 7:33:50am
+    Author:  Max
+
+  ==============================================================================
+*/
+
+#pragma once
+# include "FilterClasses.h"
+#include <iostream>
+
+class MonoDelay
+{
+public:
+    MonoDelay();
+    MonoDelay(float sr);
+    MonoDelay(const MonoDelay &d);
+    ~MonoDelay();
+    // setters
+    void setSampleRate(float sr);
+    void setDelayTime(float d);
+    void setFeedback(float f);
+    void setWetDry(float w, float d);
+    void set_dtime_change_speed(float s);
+    // process audio
+    float process_sample(float s);
+    // getters
+    int get_max_delay_samples() const;
+    int get_read_pointer() const;
+    int get_write_pointer() const;
+    float get_delay_time() const;
+    int get_delay_samples_target() const;
+    float get_delay_samples_current() const;
+    int get_delay_samples_current_int() const;
+    float get_sample_rate() const;
+    float get_feedback() const;
+    float get_dry() const;
+    float get_wet() const;
+    float get_dtime_change_speed() const;
+    
+    MonoDelay& operator=(const MonoDelay* d);
+private:
+    int max_delay_samples = 5*44100;
+    float circular_buffer[5*44100];
+    int read_pointer = 0;
+    int write_pointer = 0;
+    float delay_time = .25;
+    int delay_samples_target = 2*44100;
+    float delay_samples_current = 2.*44100.;
+    int delay_samples_current_int = 2*44100;
+    float sample_rate = 0.;
+    float feedback = 0.5;
+    float dry = 0.0;
+    float wet = 0.5;
+    float dtime_change_speed = 2.0;
+};
+
+// TODO: check if this could be done with inheritence from MonoDelay
+class MonoLPFDelay
+{
+public:
+    MonoLPFDelay();
+    MonoLPFDelay(float sr);
+    ~MonoLPFDelay();
+    // setters
+    void setSampleRate(float sr);
+    void setDelayTime(float d);
+    void setFeedback(float f);
+    void setWetDry(float w, float d);
+    void set_dtime_change_speed(float s);
+    void setLPFfrequency(float f);
+    void setLPFq(float q_in);
+    // process audio
+    float process_sample(float s);
+private:
+    int max_delay_samples = 5*44100;
+    float circular_buffer[5*44100];
+    int read_pointer = 0;
+    int write_pointer = 0;
+    float delay_time = .25;
+    int delay_samples_target = 2*44100;
+    float delay_samples_current = 2.*44100.;
+    int delay_samples_current_int = 2*44100;
+    float sample_rate = 0;
+    float feedback = 0.5;
+    float dry = 0.0;
+    float wet = 0.5;
+    float dtime_change_speed = 2.0;
+    LowPassFilter *lpf;
+    float frequency = 500.;
+    float q = 1.;
+};
+
+class MonoHLPFDelay
+{
+public:
+    MonoHLPFDelay();
+    MonoHLPFDelay(float sr);
+    ~MonoHLPFDelay();
+    // setters
+    void setSampleRate(float sr);
+    void setDelayTime(float d);
+    void setFeedback(float f);
+    void setWetDry(float w, float d);
+    void set_dtime_change_speed(float s);
+    void setLPFfrequency(float f);
+    void setLPFq(float q_in);
+    void setHPFfrequency(float f);
+    void setHPFq(float q_in);
+    // process audio
+    float process_sample(float s);
+private:
+    int max_delay_samples = 5*44100;
+    float circular_buffer[5*44100];
+    int read_pointer = 0;
+    int write_pointer = 0;
+    float delay_time = .25;
+    int delay_samples_target = 2*44100;
+    float delay_samples_current = 2.*44100.;
+    int delay_samples_current_int = 2*44100;
+    float sample_rate = 0;
+    float feedback = 0.5;
+    float dry = 0.0;
+    float wet = 0.5;
+    float dtime_change_speed = 2.0;
+    LowPassFilter lpf;
+    float low_frequency = 500.;
+    float low_q = 1.;
+    HighPassFilter hpf;
+    float high_frequency = 500.;
+    float high_q = 1.;
+};
