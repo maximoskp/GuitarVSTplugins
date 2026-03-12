@@ -1,0 +1,13 @@
+- Make a subfolder with the code for the elk audio os.
+
+- Reverb: add a "dry" knob.
+
+- Chorus: rename "speed" knob to "slow" and create another knob for "fast". Make "slow/fast" toggle control which one defines the actual effect speed.
+
+- Make a pitch shifter with semitone control.
+
+- Make a synth plugin using multiple pitch shifters.
+
+- Make the Metronome vst plugin that optionally locks to the host tempo, time signature and playback process.
+
+- Make a looper.
