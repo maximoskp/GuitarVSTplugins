@@ -39,14 +39,19 @@ ChorusVSTAudioProcessor::createParameterLayout()
         juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
         0.5f));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
-        juce::ParameterID{"speed", 1},
-        "Speed",
-        juce::NormalisableRange<float>(0.01f, 10.0f, 0.01f),
+        juce::ParameterID{"slow", 1},
+        "Slow",
+        juce::NormalisableRange<float>(0.01f, 3.0f, 0.01f),
         0.5f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"fast", 1},
+        "Fast",
+        juce::NormalisableRange<float>(3.f, 10.0f, 0.01f),
+        5.f));
     
     params.push_back(std::make_unique<juce::AudioParameterBool>(
         juce::ParameterID{"slow_fast",1},
-        "Fast",
+        "Slw/Fst",
         false));
     params.push_back(std::make_unique<juce::AudioParameterBool>(
         juce::ParameterID{"stereo",1},
@@ -128,7 +133,8 @@ void ChorusVSTAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
     for (auto& c : choruses)
         c.prepare(sampleRate);   // if you have prepare()
     
-    float speed = *parameters.getRawParameterValue("speed");
+    float fast = *parameters.getRawParameterValue("fast");
+    float slow = *parameters.getRawParameterValue("slow");
     float depth = *parameters.getRawParameterValue("depth");
     
     bool slow_fast = *parameters.getRawParameterValue("slow_fast");
@@ -136,6 +142,7 @@ void ChorusVSTAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
     
     float i = 0.;
     float phase = 0.;
+    float speed = slow_fast ? fast : slow;
     for (auto& chorus : choruses){
         chorus.setSpeed(speed);
         chorus.setDepth(depth);
@@ -145,7 +152,8 @@ void ChorusVSTAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
         // TODO: stereo and speed
     }
     
-    parameters.addParameterListener("speed", this);
+    parameters.addParameterListener("fast", this);
+    parameters.addParameterListener("slow", this);
     parameters.addParameterListener("depth", this);
     
     parameters.addParameterListener("stereo", this);
@@ -154,7 +162,11 @@ void ChorusVSTAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
 
 void ChorusVSTAudioProcessor::parameterChanged(const juce::String& id, float newValue)
 {
-    if (id == "speed"){
+    if (id == "slow" && !*parameters.getRawParameterValue("slow_fast")){
+        for (auto& chorus : choruses){
+            chorus.setSpeed(newValue);
+        }
+    }else if (id == "fast" && *parameters.getRawParameterValue("slow_fast")){
         for (auto& chorus : choruses){
             chorus.setSpeed(newValue);
         }
@@ -171,12 +183,12 @@ void ChorusVSTAudioProcessor::parameterChanged(const juce::String& id, float new
             i++;
         }
     }else if(id == "slow_fast"){
-//        float i = -0.1f;
         for (auto& chorus : choruses){
-            chorus.setFeedback(newValue*0.5);
-//            float speed = *parameters.getRawParameterValue("speed");
-//            chorus.setSpeed(speed*(1.+ newValue*i));
-//            i += 0.2;
+            if (newValue){
+                chorus.setSpeed(*parameters.getRawParameterValue("fast"));
+            }else{
+                chorus.setSpeed(*parameters.getRawParameterValue("slow"));
+            }
         }
     }
 }

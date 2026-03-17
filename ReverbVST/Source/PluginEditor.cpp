@@ -15,16 +15,19 @@ ReverbVSTAudioProcessorEditor::ReverbVSTAudioProcessorEditor (ReverbVSTAudioProc
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (400, 200);
+    setSize (400, 400);
     addAndMakeVisible(reverbRoomSlider);
     configureSlider(reverbRoomSlider, "Size");
     
     addAndMakeVisible(reverbDampSlider);
     configureSlider(reverbDampSlider, "Damp");
     
-    // --- Wet ---
+    // --- Wet / Dry ---
     addAndMakeVisible(reverbWetSlider);
     configureSlider(reverbWetSlider, "Wet");
+    
+    addAndMakeVisible(reverbDrySlider);
+    configureSlider(reverbDrySlider, "Dry");
     
     roomsizeAttach = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
                                       audioProcessor.parameters, "room_size", reverbRoomSlider);
@@ -32,6 +35,8 @@ ReverbVSTAudioProcessorEditor::ReverbVSTAudioProcessorEditor (ReverbVSTAudioProc
                                       audioProcessor.parameters, "damping", reverbDampSlider);
     wetAttach = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
                                       audioProcessor.parameters, "wet", reverbWetSlider);
+    dryAttach = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+                                      audioProcessor.parameters, "dry", reverbDrySlider);
 }
 
 ReverbVSTAudioProcessorEditor::~ReverbVSTAudioProcessorEditor()
@@ -58,15 +63,39 @@ void ReverbVSTAudioProcessorEditor::resized()
     // subcomponents in your editor..
     auto area = getLocalBounds().toFloat();
     auto upper = area.removeFromTop(area.getHeight() * 0.95f).reduced(12.0f, 8.0f);
-    
+
     revBox = upper;
-    
+
     upper.removeFromTop(20.0f); // label space
-    
-    auto upperW = upper.getWidth() / 3.0f;
-    reverbRoomSlider.setBounds(upper.removeFromLeft(upperW).reduced(6.0f).toNearestInt());
-    reverbDampSlider.setBounds(upper.removeFromLeft(upperW).reduced(6.0f).toNearestInt());
-    reverbWetSlider.setBounds(upper.reduced(6.0f).toNearestInt());
+
+    // Split vertically into two rows
+    auto rowHeight = upper.getHeight() / 2.0f;
+
+    auto topRow = upper.removeFromTop(rowHeight);
+    auto bottomRow = upper;
+
+    // Split rows into two columns
+    auto colWidth = topRow.getWidth() / 2.0f;
+
+    // Top row
+    reverbRoomSlider.setBounds(topRow.removeFromLeft(colWidth).reduced(6.0f).toNearestInt());
+    reverbDampSlider.setBounds(topRow.reduced(6.0f).toNearestInt());
+
+    // Bottom row
+    reverbWetSlider.setBounds(bottomRow.removeFromLeft(colWidth).reduced(6.0f).toNearestInt());
+    reverbDrySlider.setBounds(bottomRow.reduced(6.0f).toNearestInt());
+//    auto area = getLocalBounds().toFloat();
+//    auto upper = area.removeFromTop(area.getHeight() * 0.95f).reduced(12.0f, 8.0f);
+//    
+//    revBox = upper;
+//    
+//    upper.removeFromTop(20.0f); // label space
+//    
+//    auto upperW = upper.getWidth() / 2.0f;
+//    reverbRoomSlider.setBounds(upper.removeFromLeft(upperW).reduced(6.0f).toNearestInt());
+//    reverbDampSlider.setBounds(upper.removeFromLeft(upperW).reduced(6.0f).toNearestInt());
+//    reverbWetSlider.setBounds(upper.removeFromLeft(upperW).reduced(6.0f).toNearestInt());
+//    reverbDrySlider.setBounds(upper.reduced(6.0f).toNearestInt());
 }
 
 void ReverbVSTAudioProcessorEditor::configureSlider (juce::Slider& s, const juce::String& suffix)

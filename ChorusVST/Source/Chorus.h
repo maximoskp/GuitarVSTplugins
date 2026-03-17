@@ -13,7 +13,7 @@
 #include <cmath>
 #include "DelayClasses.h"
 #include "SineGenerator.h"
-// #include <JuceHeader.h>
+//#include <JuceHeader.h>
 
 using namespace std;
 
@@ -36,10 +36,14 @@ public:
     void prepare(float sr, float d, float s, bool on);
     void prepare(float sr, float d, float s, float p, bool on);
     
+    float getSpeed();
+    
 private:
     float sample_rate;
     float depth;
     float speed;
+    float speed_target;
+    float speed_delta;
     float phase;
     float feedback;
     bool onoff;

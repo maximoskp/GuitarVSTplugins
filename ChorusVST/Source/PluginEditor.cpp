@@ -13,7 +13,7 @@
 ChorusVSTAudioProcessorEditor::ChorusVSTAudioProcessorEditor (ChorusVSTAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
-    slow_fastLabel.setText("Fast", juce::dontSendNotification);
+    slow_fastLabel.setText("Sl/Fst", juce::dontSendNotification);
     slow_fastLabel.setColour(juce::Label::textColourId, VisualStyle::getStateColor(VisualStyle::Palette::green, true));
     slow_fastLabel.setFont(VisualStyle::getDefaultFont(14));
     slow_fastLabel.setJustificationType(juce::Justification::centredLeft);
@@ -27,9 +27,12 @@ ChorusVSTAudioProcessorEditor::ChorusVSTAudioProcessorEditor (ChorusVSTAudioProc
     
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (400, 200);
-    addAndMakeVisible(speedSlider);
-    configureSlider(speedSlider, "Speed");
+    setSize (400, 400);
+    addAndMakeVisible(slowSlider);
+    configureSlider(slowSlider, "Slow");
+    
+    addAndMakeVisible(fastSlider);
+    configureSlider(fastSlider, "Fast");
     
     addAndMakeVisible(depthSlider);
     configureSlider(depthSlider, "Depth");
@@ -40,8 +43,10 @@ ChorusVSTAudioProcessorEditor::ChorusVSTAudioProcessorEditor (ChorusVSTAudioProc
     addAndMakeVisible(stereo_toggle);
     configureToggle(stereo_toggle, false);
     
-    speedAttach = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-                                      audioProcessor.parameters, "speed", speedSlider);
+    slowAttach = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+                                      audioProcessor.parameters, "slow", slowSlider);
+    fastAttach = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+                                      audioProcessor.parameters, "fast", fastSlider);
     depthAttach = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
                                       audioProcessor.parameters, "depth", depthSlider);
     
@@ -78,47 +83,113 @@ void ChorusVSTAudioProcessorEditor::resized()
     // subcomponents in your editor..
     auto area = getLocalBounds().toFloat();
     auto upper = area.removeFromTop(area.getHeight() * 0.95f).reduced(12.0f, 8.0f);
-    
+
     revBox = upper;
-    
+
+    // Divide plugin into 4 vertical sections (same as before)
     auto lowerW = upper.getWidth() / 3.0f;
     auto left = upper.removeFromLeft(lowerW);
     auto middle = upper.removeFromLeft(lowerW);
     auto right = upper;
-    
+
     upper.removeFromTop(20.0f); // label space
-    
-    auto upperW = upper.getWidth() / 3.0f;
-    
-    depthSlider.setBounds(left.reduced(6.0f).toNearestInt());
-    speedSlider.setBounds(middle.reduced(6.0f).toNearestInt());
-    
-    // Stack the two toggles vertically in the right third
+
+    // =====================================================
+    // KNOBS AREA (left + middle columns)
+    // =====================================================
+
+    auto knobsArea = left.getUnion(middle);
+    auto rowH = knobsArea.getHeight() / 2.0f;
+
+    auto topRow = knobsArea.removeFromTop(rowH);
+    auto bottomRow = knobsArea;
+
+    // --- top row: slow + fast ---
+    auto colW = topRow.getWidth() / 2.0f;
+
+    slowSlider.setBounds(topRow.removeFromLeft(colW).reduced(6).toNearestInt());
+    fastSlider.setBounds(topRow.reduced(6).toNearestInt());
+
+    // --- bottom row: centered depth ---
+    auto depthWidth = colW;
+    auto centeredDepth = bottomRow.withSizeKeepingCentre(depthWidth, bottomRow.getHeight());
+
+    depthSlider.setBounds(centeredDepth.reduced(6).toNearestInt());
+
+
+    // =====================================================
+    // TOGGLES (unchanged right column)
+    // =====================================================
+
     auto toggleArea = right.reduced(12.0f);
     auto toggleH = toggleArea.getHeight() / 2.0f;
 
-    // --- First row: chorus on/off ---
+    // --- First row ---
     {
         auto row = toggleArea.removeFromTop(toggleH).reduced(4.0f);
-        
-        // Split row: LEFT = 1/3 (toggle), RIGHT = 2/3 (label)
+
         auto leftForToggle  = row.removeFromLeft(row.getWidth() / 3);
-        auto rightForLabel  = row; // remaining 2/3
+        auto rightForLabel  = row;
 
         slow_fast_toggle.setBounds(leftForToggle.toNearestInt());
         slow_fastLabel.setBounds(rightForLabel.toNearestInt());
     }
 
-    // --- Second row: slow/fast ---
+    // --- Second row ---
     {
         auto row = toggleArea.reduced(4.0f);
 
         auto leftForToggle  = row.removeFromLeft(row.getWidth() / 3);
-        auto rightForLabel  = row; // remaining 2/3
+        auto rightForLabel  = row;
 
         stereo_toggle.setBounds(leftForToggle.toNearestInt());
         stereoLabel.setBounds(rightForLabel.toNearestInt());
     }
+//    auto area = getLocalBounds().toFloat();
+//    auto upper = area.removeFromTop(area.getHeight() * 0.95f).reduced(12.0f, 8.0f);
+//    
+//    revBox = upper;
+//    
+//    auto lowerW = upper.getWidth() / 4.0f;
+//    auto left = upper.removeFromLeft(lowerW);
+//    auto middle_left = upper.removeFromLeft(lowerW);
+//    auto middle_right = upper.removeFromLeft(lowerW);
+//    auto right = upper;
+//    
+//    upper.removeFromTop(20.0f); // label space
+//    
+////    auto upperW = upper.getWidth() / 4.0f;
+//    
+//    slowSlider.setBounds(middle_left.reduced(6.0f).toNearestInt());
+//    fastSlider.setBounds(middle_right.reduced(6.0f).toNearestInt());
+//    depthSlider.setBounds(left.reduced(6.0f).toNearestInt());
+//    
+//    // Stack the two toggles vertically in the right third
+//    auto toggleArea = right.reduced(12.0f);
+//    auto toggleH = toggleArea.getHeight() / 2.0f;
+//
+//    // --- First row: chorus on/off ---
+//    {
+//        auto row = toggleArea.removeFromTop(toggleH).reduced(4.0f);
+//        
+//        // Split row: LEFT = 1/3 (toggle), RIGHT = 2/3 (label)
+//        auto leftForToggle  = row.removeFromLeft(row.getWidth() / 3);
+//        auto rightForLabel  = row; // remaining 2/3
+//
+//        slow_fast_toggle.setBounds(leftForToggle.toNearestInt());
+//        slow_fastLabel.setBounds(rightForLabel.toNearestInt());
+//    }
+//
+//    // --- Second row: slow/fast ---
+//    {
+//        auto row = toggleArea.reduced(4.0f);
+//
+//        auto leftForToggle  = row.removeFromLeft(row.getWidth() / 3);
+//        auto rightForLabel  = row; // remaining 2/3
+//
+//        stereo_toggle.setBounds(leftForToggle.toNearestInt());
+//        stereoLabel.setBounds(rightForLabel.toNearestInt());
+//    }
 }
 
 void ChorusVSTAudioProcessorEditor::configureSlider (juce::Slider& s, const juce::String& suffix)

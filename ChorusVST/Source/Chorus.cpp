@@ -14,6 +14,8 @@ Chorus::Chorus(){
     sample_rate = 44100;
     depth = 0.003;
     speed = 3.;
+    speed_target = speed;
+    speed_delta = 2./sample_rate;
     phase = 0.f;
     feedback = 0.f;
     onoff = true;
@@ -31,6 +33,8 @@ Chorus::Chorus(float sr){
     sample_rate = sr;
     depth = 0.003;
     speed = 3.;
+    speed_target = speed;
+    speed_delta = 2./sample_rate;
     phase = 0.f;
     feedback = 0.f;
     onoff = true;
@@ -48,6 +52,8 @@ Chorus::Chorus(float sr, float d, float s){
     sample_rate = sr;
     depth = d;
     speed = s;
+    speed_target = speed;
+    speed_delta = 2./sample_rate;
     phase = 0.f;
     feedback = 0.f;
     onoff = true;
@@ -65,6 +71,8 @@ Chorus::Chorus(float sr, float d, float s, float p){
     sample_rate = sr;
     depth = d;
     speed = s;
+    speed_target = speed;
+    speed_delta = 2./sample_rate;
     phase = p;
     feedback = 0.f;
     onoff = true;
@@ -84,6 +92,7 @@ Chorus::~Chorus(){
 
 void Chorus::setSampleRate(int sr){
     sample_rate = sr;
+    speed_delta = 2./sample_rate;
 }
 void Chorus::setDepth(float d){
     depth = depth_multiplier*d;
@@ -91,8 +100,9 @@ void Chorus::setDepth(float d){
     sine->setAmplitude(depth);
 }
 void Chorus::setSpeed(float s){
-    speed = s;
-    sine->setFrequency(s);
+    speed_target = s;
+//    speed = s;
+//    sine->setFrequency(s);
 }
 void Chorus::setPhase(float p){
     phase = p;
@@ -105,9 +115,16 @@ void Chorus::setFeedback(float f){
 void Chorus::setOnOff(bool on){
     onoff = on;
 }
+float Chorus::getSpeed(){
+    return speed;
+}
 float Chorus::process_sample(float s){
+    if (abs(speed_target - speed) > 2*speed_delta){
+        float speed_step = abs(speed_target - speed) > 1.0 ? abs(speed_target - speed)/sample_rate : speed_delta;
+        speed += speed_target > speed ? speed_step : -speed_step;
+    }
+    sine->setFrequency(speed);
     float sine_sample = sine->getNextSample();
-    // DBG("delay time: " + juce::String(center_delay_time + sine_sample));
     delay->setDelayTime( center_delay_time + sine_sample );
     return s + float(onoff)*(1 - depth + s)*delay->process_sample(s);
 }
@@ -116,6 +133,8 @@ void Chorus::prepare(float sr){
     sample_rate = sr;
     depth = 0.003;
     speed = 3.;
+    speed_target = speed;
+    speed_delta = 2./sample_rate;
     phase = 0.f;
     feedback = 0.f;
     onoff = true;
@@ -132,6 +151,8 @@ void Chorus::prepare(float sr, float d, float s, bool on){
     sample_rate = sr;
     depth = d*depth_multiplier;
     speed = s;
+    speed_target = speed;
+    speed_delta = 2./sample_rate;
     phase = 0.f;
     feedback = 0.f;
     onoff = on;
@@ -148,6 +169,8 @@ void Chorus::prepare(float sr, float d, float s, float p, bool on){
     sample_rate = sr;
     depth = d*depth_multiplier;
     speed = s;
+    speed_target = speed;
+    speed_delta = 2./sample_rate;
     phase = p;
     feedback = 0.f;
     onoff = on;

@@ -36,23 +36,23 @@ AmpVSTAudioProcessor::createParameterLayout()
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{"pre_highf", 1},
         "Pre_HF",
-        juce::NormalisableRange<float>(50.0f, 2000.0f, 1.0f),
-        80.0f));
+        juce::NormalisableRange<float>(50.0f, 1000.0f, 1.0f),
+        120.0f));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{"pre_lowf",1},
         "Pre_LF",
-        juce::NormalisableRange<float>(200.0f, 2000.0f, 1.0f),
-        1000.0f));
+        juce::NormalisableRange<float>(1000.0f, 8000.0f, 1.0f),
+        5000.0f));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{"post_highf",1},
         "Post_HF",
-        juce::NormalisableRange<float>(50.0f, 2000.0f, 1.0f),
-        80.0f));
+        juce::NormalisableRange<float>(50.0f, 1000.0f, 1.0f),
+        120.0f));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{"post_lowf",1},
         "Post_LF",
-        juce::NormalisableRange<float>(200.0f, 2000.0f, 1.0f),
-        1000.0f));
+        juce::NormalisableRange<float>(1000.0f, 8000.0f, 1.0f),
+        5000.0f));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{"gain",1},
         "Gain",

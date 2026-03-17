@@ -32,12 +32,13 @@ private:
     // access the processor object that created it.
     ReverbVSTAudioProcessor& audioProcessor;
     
-    juce::Slider reverbRoomSlider, reverbDampSlider, reverbWetSlider;
+    juce::Slider reverbRoomSlider, reverbDampSlider, reverbWetSlider, reverbDrySlider;
     
     // --- Attachments (ORDER MATTERS: after UI members) ---
     std::unique_ptr<SliderAttachment> roomsizeAttach;
     std::unique_ptr<SliderAttachment> dampingAttach;
     std::unique_ptr<SliderAttachment> wetAttach;
+    std::unique_ptr<SliderAttachment> dryAttach;
     
     juce::Rectangle<float> revBox;
     

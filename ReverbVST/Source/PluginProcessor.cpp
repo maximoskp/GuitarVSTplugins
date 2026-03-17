@@ -47,7 +47,12 @@ ReverbVSTAudioProcessor::createParameterLayout()
         juce::ParameterID{"wet", 1},
         "Wet",
         juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
-        0.5f));
+        0.3f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"dry", 1},
+        "Dry",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        1.0f));
 
     return { params.begin(), params.end() };
 }
@@ -127,16 +132,19 @@ void ReverbVSTAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
     float room_size = *parameters.getRawParameterValue("room_size");
     float damping = *parameters.getRawParameterValue("damping");
     float wet = *parameters.getRawParameterValue("wet");
+    float dry = *parameters.getRawParameterValue("dry");
     
     for (auto& reverb : reverbs){
         reverb.setRoomSize(room_size);
         reverb.setDamping(damping);
         reverb.setWet(wet);
+        reverb.setDry(dry);
     }
     
     parameters.addParameterListener("room_size", this);
     parameters.addParameterListener("damping", this);
     parameters.addParameterListener("wet", this);
+    parameters.addParameterListener("dry", this);
 }
 void ReverbVSTAudioProcessor::parameterChanged(const juce::String& id, float newValue)
 {
@@ -146,6 +154,8 @@ void ReverbVSTAudioProcessor::parameterChanged(const juce::String& id, float new
         for (auto& reverb : reverbs) reverb.setDamping(newValue);
     }else if(id == "wet"){
         for (auto& reverb : reverbs) reverb.setWet(newValue);
+    }else if(id == "dry"){
+        for (auto& reverb : reverbs) reverb.setDry(newValue);
     }
 }
 

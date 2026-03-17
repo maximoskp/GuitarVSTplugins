@@ -38,12 +38,13 @@ private:
     
     CircleToggleLookAndFeel circleLAF;
     
-    juce::Slider speedSlider, depthSlider;
+    juce::Slider slowSlider, fastSlider, depthSlider;
     juce::ToggleButton slow_fast_toggle, stereo_toggle;
     
     juce::Label slow_fastLabel, stereoLabel;
     
-    std::unique_ptr<SliderAttachment> speedAttach;
+    std::unique_ptr<SliderAttachment> slowAttach;
+    std::unique_ptr<SliderAttachment> fastAttach;
     std::unique_ptr<SliderAttachment> depthAttach;
     
     std::unique_ptr<ButtonAttachment> slow_fastAttach;

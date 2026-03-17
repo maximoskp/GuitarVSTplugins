@@ -56,6 +56,9 @@ public:
     void setWet(float value){
         wet = value;
     }
+    void setDry(float value){
+        dry = value;
+    }
     void set_sampleRate(float value){
         float sample = value;
     }
@@ -68,7 +71,7 @@ public:
             output += c.process (input);
         for (auto& a : allpasses)
             output = a.process (output);
-        return 0.3*output * wet*wet + input_copy * (1.0f - wet*wet);
+        return 0.3*output * wet*wet + dry*input_copy;
     }
 
     void reset()
@@ -150,4 +153,5 @@ private:
     std::array<Comb, 8> combs;
     std::array<Allpass, 4> allpasses;
     float wet = 0.33f;
+    float dry = 1.f;
 };
